@@ -1,0 +1,102 @@
+body {
+    margin: 0;
+    margin-top: 100px;
+    font-family: "Nanum Gothic", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #52565b;
+    background-color: #fff;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+@media only screen and (max-width: 479px) {
+    h1 {
+        font-size: 1rem;
+    }
+    h2 {
+        font-size: 0.75rem;
+    }
+}
+
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    h2 {
+        font-size: 1rem;
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1023px) {
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.25rem;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+a,
+a:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #06bbcc;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.link:hover,
+.link:focus {
+    color: #0596a3;
+    cursor: pointer;
+}
+
+.chart_outer {
+    text-align: center;
+}
+
+.chart_inner {
+    position: relative;
+    height:70%;
+    width:70%;
+    border: 1px solid #B6C9D2;
+    border-radius: 30px;
+    padding: 50px;
+    margin-top: 2%;
+    display: inline-block;
+}
+
+
+table.image-table {
+    width: 100%;
+    border: 1px solid #444444;
+    border-collapse: collapse;
+}
+
+table.image-table th {
+    border: 1px solid #444444;
+}
+
+table.image-table tr {
+    border: 1px solid #444444;
+}
+
+table.image-table td {
+    width: 20%;
+    border: 1px solid #444444;
+}

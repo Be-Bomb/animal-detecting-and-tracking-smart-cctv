@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous">
+        </script>
+
+    <!-- Date Range Picker dependencies -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+
+    <!-- CSS Dependency -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
+
+    <!-- Google Font API -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@700&display=swap" rel="stylesheet" />
+
+    <title>BeBomb SMART CCTV</title>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <!-- 네비게이션 바  -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container-fluid">
+            <div class="navber-brand"><img src="{{ url_for('static', filename='assets/be_bomb_logo.png') }}" /><a
+                    href="/">BeBomb SMART CCTV</a></div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">MENU</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav justify-content-start flex-grow-1 pe-3">
+                        <li class="nav-item">
+                            <a class="nav-link link" aria-current="page" id="storageButton" data-bs-toggle="modal"
+                                data-bs-target="#storageModal" style="padding-left: 1rem;">Storage</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link link" aria-current="page" id="dataChartButton" , href="/charts_page">Data
+                                Chart</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- 컨테이너  -->
+    <div class="container-xl mt-5 mb-5">
+        <!--  현재 시각 -->
+        <div class="row text-center mb-1">
+            <h1 id="presentTime"></h1>
+        </div>
+
+        <!-- JQuery JS -->
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.0/chart.min.js'></script>
+        <!-- chart.js -->
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+
+        <div class="chart_outer">
+            <!-- 시간대별 통계 -->
+            <div class="chart_inner">
+                <canvas id="stackedBarChart_day" width="100" , height="50"></canvas>
+            </div>
+            <script>
+                var time_day = JSON.parse("{{time_day}}");
+                var ctx = document.getElementById('stackedBarChart_day').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["21시-0시", "0시-3시", "3시-6시", "6시-9시", "etc"],
+                        datasets: [
+                            {
+                                label: '고라니',
+                                data: time_day[0],
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '멧돼지',
+                                data: time_day[1],
+                                backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                                borderColor: 'rgb(255, 205, 86)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '고양이',
+                                data: time_day[2],
+                                backgroundColor: 'rgba(68, 186, 38, 0.2)',
+                                borderColor: 'rgb(68, 186, 38)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '사람',
+                                data: time_day[3],
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgb(54, 162, 235)',
+                                borderWidth: 0.5,
+                            }
+                        ],
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '오늘 시간대별 탐지 현황'
+                            }
+                        }
+                    },
+                });
+            </script>
+
+
+            <div class="chart_inner">
+                <canvas id="stackedBarChart_week" width="100" , height="50"></canvas>
+            </div>
+            <script>
+                var time_weekly = JSON.parse("{{time_weekly}}");
+                var ctx = document.getElementById('stackedBarChart_week').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["21시-0시", "0시-3시", "3시-6시", "6시-9시", "etc"],
+                        datasets: [
+                            {
+                                label: '고라니',
+                                data: time_weekly[0],
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '멧돼지',
+                                data: time_weekly[1],
+                                backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                                borderColor: 'rgb(255, 205, 86)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '고양이',
+                                data: time_weekly[2],
+                                backgroundColor: 'rgba(68, 186, 38, 0.2)',
+                                borderColor: 'rgb(68, 186, 38)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '사람',
+                                data: time_weekly[3],
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgb(54, 162, 235)',
+                                borderWidth: 0.5,
+                            }
+                        ],
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '최근 7일 시간대별 탐지 현황'
+                            }
+                        }
+                    },
+                });
+            </script>
+
+
+            <div class="chart_inner">
+                <canvas id="stackedBarChart_total" width="100" , height="50"></canvas>
+            </div>
+            <script>
+                var time_total = JSON.parse("{{time_total}}");
+                var ctx = document.getElementById('stackedBarChart_total').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["21시-0시", "0시-3시", "3시-6시", "6시-9시", "etc"],
+                        datasets: [
+                            {
+                                label: '고라니',
+                                data: time_total[0],
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '멧돼지',
+                                data: time_total[1],
+                                backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                                borderColor: 'rgb(255, 205, 86)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '고양이',
+                                data: time_total[2],
+                                backgroundColor: 'rgba(68, 186, 38, 0.2)',
+                                borderColor: 'rgb(68, 186, 38)',
+                                borderWidth: 0.5,
+                            },
+                            {
+                                label: '사람',
+                                data: time_total[3],
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgb(54, 162, 235)',
+                                borderWidth: 0.5,
+                            }
+                        ],
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '전체 시간대별 탐지 현황'
+                            }
+                        }
+                    },
+                });
+            </script>
+
+            <!-- 파이 차트 -->
+            <div class="chart_inner">
+                <canvas id="PieChart_day" width="100" , height="50"></canvas>
+            </div>
+            <script>
+                var day_total = JSON.parse("{{day_total}}");
+                var ctx = document.getElementById('PieChart_day').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ["고라니", "멧돼지", "고양이", "사람"],
+                        datasets: [
+                            {
+                                data: day_total,
+                                backgroundColor: ['rgba(255,99,132,1)', 'rgba(255,205,86,1)', 'rgba(68,186,38,1)', 'rgba(54,162,235,1)'],
+                                borderColor: ['rgb(255,255,255)', 'rgb(255,255,255)', 'rgb(255,255,255)', 'rgba(255,255,255)'],
+                                borderWidth: 0.5,
+                            },
+                        ],
+                    },
+                    options: {
+                        type: 'pie',
+                        reponsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '오늘 탐지 현황'
+                            }
+                        }
+                    },
+                });
+            </script>
+
+            <div class="chart_inner">
+                <canvas id="PieChart_week" width="100" , height="50"></canvas>
+            </div>
+            <script>
+                var weekly_total = JSON.parse("{{weekly_total}}");
+                var ctx = document.getElementById('PieChart_week').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ["고라니", "멧돼지", "고양이", "사람"],
+                        datasets: [
+                            {
+                                data: weekly_total,
+                                backgroundColor: ['rgba(255,99,132,1)', 'rgba(255,205,86,1)', 'rgba(68,186,38,1)', 'rgba(54,162,235,1)'],
+                                borderColor: ['rgb(255,255,255)', 'rgb(255,255,255)', 'rgb(255,255,255)', 'rgba(255,255,255)'],
+                                borderWidth: 0.5,
+                            },
+                        ],
+                    },
+                    options: {
+                        type: 'pie',
+                        reponsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '주간 탐지 현황'
+                            }
+                        }
+                    },
+                });
+            </script>
+
+            <div class="chart_inner">
+                <canvas id="PieChart_all" width="100" , height="50"></canvas>
+            </div>
+            <script>
+                var all_total = JSON.parse("{{all_total}}");
+                var ctx = document.getElementById('PieChart_all').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ["고라니", "멧돼지", "고양이", "사람"],
+                        datasets: [
+                            {
+                                data: all_total,
+                                backgroundColor: ['rgba(255,99,132,1)', 'rgba(255,205,86,1)', 'rgba(68,186,38,1)', 'rgba(54,162,235,1)'],
+                                borderColor: ['rgb(255,255,255)', 'rgb(255,255,255)', 'rgb(255,255,255)', 'rgba(255,255,255)'],
+                                borderWidth: 0.5,
+                            },
+                        ],
+                    },
+                    options: {
+                        type: 'pie',
+                        reponsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '전체 탐지 현황'
+                            }
+                        }
+                    },
+                });
+            </script>
+
+            <!-- 모달 창 -->
+            <div class="modal fade" id="storageModal" tabindex="-1" aria-labelledby="storageModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-xl" id="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="storageModalLabel">촬영된 이미지</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% if not session["imageName"] %}
+                            <div>아직 데이터가 없습니다.</div>
+                            {% else %}
+                            <div class="container-fluid">
+                                <div class="row row-cols-3">
+                                    <table class="image-table">
+                                        <th width="50%">사진</th><th>날짜</th><th>시간</th><th>이름</th>
+                                        {% for image in session["imageName"] %}
+                                        <tr>
+                                            <td>
+                                                <img src="{{ url_for('static', filename=image|string) }}" class="img-fluid col" />
+                                            </td>
+                                            <td>
+                                                {% 
+                                                    print(image.split('/')[2].split('_')[0])
+                                                %}
+                                            </td>
+                                            <td>
+                                                {% 
+                                                    print("{}:{}:{}".format(image.split('/')[2].split('_')[1][:2], image.split('/')[2].split('_')[1][2:4], image.split('/')[2].split('_')[1][4:6]))
+                                                %}
+                                            </td>
+                                            <td>
+                                                {%
+                                                    print(obdict[image.split('/')[2].split('_')[-1][:3]])
+                                                %}
+
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- footer -->
+        <footer class="bg-light text-center text-lg-start mt-auto">
+            <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+                <a href="https://github.com/Be-Bomb" target="_blank">
+                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                        style="width: 40px" />
+                    <span>2022 Copyright: 인천대학교 컴퓨터공학부 캡스톤디자인 Be-Bomb</span>
+                    <img src="{{ url_for('static', filename='assets/be_bomb_logo.png') }}" />
+                </a>
+            </div>
+        </footer>
+</body>
+<script>
+    function makeList(data) {
+        var arr = []
+        for (item of data) {
+            arr.push(item);
+        }
+        return arr;
+    }
+</script>
+
+<!-- Javascript Dependencies -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/dateRangePicker.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/init.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/modules.js') }}"></script>
+<script>
+    function loadInfo(input) {
+    print(input);
+    // var file = input.files[0];
+
+    // var name = document.getElementById('fileName');
+    // name.textContent = file.name;
+
+    // var newImage = document.createElement("img");
+    // newImage.setAttribute("class", 'img');
+
+    // newImage.src = URL.createObjectURL(file);   
+
+    // newImage.style.width = "70%";
+    // newImage.style.height = "70%";
+    // newImage.style.visibility = "hidden";   //버튼을 누르기 전까지는 이미지 숨기기
+    // newImage.style.objectFit = "contain";
+
+    // var container = document.getElementById('image-show');
+    // container.appendChild(newImage);
+    result = input;
+    document.write(result);
+};
+
+</script>
