@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from datetime import datetime
+import time
 import json
 import re
 from module import firebase_work as fw
@@ -47,16 +48,17 @@ class Yolo:
         self.object_to_json = {}
         self.detected_object_list = []
 
-    # Video stream frame을 생성하고 웹으로 전송함
-
-    def gen_frames(self):
         # 영상선택 pi / 웹캠 / 동영상
         if self.args.input == "pi":
-            image_hub = imagezmq.ImageHub()
+            self.image_hub = imagezmq.ImageHub()
+
         elif self.args.input == "0":
-            vs = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            self.vs = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         else:
-            vs = cv2.VideoCapture(self.args.input)
+            self.vs = cv2.VideoCapture(self.args.input)
+
+    # Video stream frame을 생성하고 웹으로 전송함
+    def gen_frames(self):
 
         (W, H) = (None, None)
 
@@ -64,18 +66,26 @@ class Yolo:
         while True:
             # read the next frame from the file
             if self.args.input == "pi":
-                grabbed, frame = image_hub.recv_image()
+                try:
+                    grabbed, frame = self.image_hub.recv_image()
+                except:
+                    print("Except Error!")
+                    self.image_hub.send_reply(b"OK")
+                    time.sleep(0.1)
+                    continue
+
             else:
-                grabbed, frame = vs.read()
+                grabbed, frame = self.vs.read()
 
             # if the frame was not grabbed, then we have reached the end of the stream
             if grabbed == False:
+                self.image_hub.send_reply(b"OK")
                 continue
 
             frame = self.detect(W, H, frame)
 
             if self.args.input == "pi":  # 파이카메라 영상 송출 부분 (필수)
-                image_hub.send_reply(b"OK")
+                self.image_hub.send_reply(b"OK")
 
             yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
 

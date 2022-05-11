@@ -112,6 +112,7 @@ def video_feed():
 # Video streaming home page.
 @ app.route("/")
 def index():
+    print("재실행")
     global rec
     obdict = {
         'wat': '고라니',
@@ -122,15 +123,55 @@ def index():
     return render_template("index.html", rec=rec, obdict=obdict)
 
 
+async def capture():
+    cv2.imwrite(
+        f"static/images/{datetime.now().strftime('%Y-%m-%d')}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S').replace(':','')}.jpeg", yolo.frame)
+    print("캡쳐 완료")
+
+
+async def recording_start():
+    thread = Thread(
+        target=record,
+        args=[video_output],
+    )
+    thread.start()
+
+
+async def recording_end():
+    video_output.release()
+
+
+async def rsv_recording():
+    start_time = request.form["scheduler"][:19]
+    start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+
+    end_time = request.form["scheduler"][22:]
+    end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    video_output = cv2.VideoWriter(
+        f"static/videos/{datetime.now().strftime('%Y-%m-%d')}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S').replace(':','')}.avi",
+        fourcc,
+        120,
+        (yolo.frame.shape[1], yolo.frame.shape[0]),
+    )
+    thread = Thread(
+        target=reserve_record,
+        args=[video_output, start_time, end_time],
+    )
+    thread.start()
+
+
 # Video streaming home page.
 @ app.route("/result", methods=["GET", "POST"])
-def result():
+async def result():
     global rec, video_output
     # now = datetime.now()
 
     if request.method == "POST":
         if request.form["button"][:2] == "녹화":
             rec = not rec
+
             if rec:
                 fourcc = cv2.VideoWriter_fourcc(*"XVID")
                 video_output = cv2.VideoWriter(
@@ -139,41 +180,25 @@ def result():
                     120,
                     (yolo.frame.shape[1], yolo.frame.shape[0]),
                 )
-                thread = Thread(
-                    target=record,
-                    args=[video_output],
-                )
-                thread.start()
+                await recording_start()
             else:
-                video_output.release()
+                await recording_end()
                 print("녹화 완료")
 
         elif request.form["button"] == "캡쳐":
-            cv2.imwrite(
-                f"static/images/{datetime.now().strftime('%Y-%m-%d')}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S').replace(':','')}.jpeg", yolo.frame)
-            print("캡쳐 완료")
+            await capture()
 
         elif request.form["button"] == "예약녹화":
-            start_time = request.form["scheduler"][:19]
-            start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+            await rsv_recording()
 
-            end_time = request.form["scheduler"][22:]
-            end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
-
-            fourcc = cv2.VideoWriter_fourcc(*"XVID")
-            video_output = cv2.VideoWriter(
-                f"static/videos/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S').replace(':','')}.avi",
-                fourcc,
-                120,
-                (yolo.frame.shape[1], yolo.frame.shape[0]),
-            )
-            thread = Thread(
-                target=reserve_record,
-                args=[video_output, start_time, end_time],
-            )
-            thread.start()
-
-    return render_template("index.html", rec=rec)
+    obdict = {
+        'wat': '고라니',
+        'wil': '멧돼지',
+        'per': '사람',
+        'cat': '고양이',
+        '': '캡쳐'
+    }
+    return render_template("index.html", rec=rec, obdict=obdict)
 
 
 @ app.route("/get_images")
@@ -217,5 +242,6 @@ if __name__ == "__main__":
     fw.getToken()
     opt = opts.parse_opt()
     yolo = Yolo(opt)
+
     # app.run(host="0.0.0.0", debug=True, port=3000)
-    app.run(host="localhost", debug=True, port=3000)
+    app.run(host="localhost", use_reloader=False, port=3000)
